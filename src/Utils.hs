@@ -1,9 +1,37 @@
 module Utils where
 
 import Data.Ord (comparing)
-import Data.List (sortBy, groupBy)
+import Data.List (sortBy, groupBy, foldr)
+
+-- creates an XY map/chart
+-- [".#.","#.."] => [
+--                    ((0,0),'.'),((1,0),'#'),((2,0),'.'),
+--                    ((0,1),'#'),((1,1),'.'),((2,1),'.')
+--                  ]
+-- Note: origin/xy:(0,0) is top left
+indexXY :: Integral n => [[a]] -> [((n,n),a)]
+--indexXY :: [[a]] -> [((x,y),a)]
+indexXY xs = concat $ [ [((x,y),c) | (x,c) <- zip [0..] r]  | (y,r) <- zip [0..] xs ]
+
+indexYX :: Integral n => [[a]] -> [((n,n),a)]
+indexYX xs = concat $ [ [((y,x),c) | (x,c) <- zip [0..] r]  | (y,r) <- zip [0..] xs ]
+
+bool2num :: Int -> Bool -> Int
+bool2num n b = if b then n else 0
+
+transpose :: [((Int,Int),a)] -> [((Int,Int),a)]
+transpose = map (\((x,y),c) -> ((y,x),c))
+
+dimensions :: [[a]] -> (Int,Int)
+dimensions xs = (length . head $ xs, length xs)
 
 stoi s = read s :: Int
+
+product :: Num a => [a] -> a
+product = foldr (*) 1
+
+sum :: Num a => [a] -> a
+sum = foldr (+) 0
 
 readLines :: FilePath -> IO [String]
 readLines fname = 

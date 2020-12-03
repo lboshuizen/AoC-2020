@@ -5,7 +5,7 @@ import Utils (stoi,split)
 
 policy1 :: (Int,Int,Char,String) -> Bool
 policy1 (p1,p2,c,pwd) = cnt >= p1 && cnt <= p2
-    where cnt = length (filter (==c) pwd)
+    where cnt = length . filter (==c) $ pwd
 
 policy2 :: (Int,Int,Char,String) -> Bool
 policy2 (p1,p2,c,pwd) 
@@ -16,7 +16,7 @@ policy2 (p1,p2,c,pwd)
 decode :: String -> (Int,Int,Char,String)
 decode s = (p1,p2,c,pwd)
     where (minmax:cc:pwd:_) = words s
-          (p1:p2:_)= (map stoi . split '-') minmax
+          (p1:p2:_)= map stoi . split '-' $ minmax
           c = head cc
 
 conform p = p . decode
