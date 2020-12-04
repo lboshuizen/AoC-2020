@@ -25,6 +25,7 @@ transpose = map (\((x,y),c) -> ((y,x),c))
 dimensions :: [[a]] -> (Int,Int)
 dimensions xs = (length . head $ xs, length xs)
 
+stoi :: String -> Int
 stoi s = read s :: Int
 
 product :: Num a => [a] -> a
@@ -44,11 +45,18 @@ unpack :: [Maybe a] -> [a]
 unpack xs = [x | Just x <- xs]
 
 split :: Eq a => a -> [a] -> [[a]]
-split d [] = []
-split d s = x : split d (drop 1 y) 
-            where (x,y) = span (/= d) s
+split p = splitWhen (==p)
 
-reduce :: (a -> a -> a) -> [a] -> a
+splitWhen :: (a -> Bool) -> [a] -> [[a]]
+splitWhen p xs
+  | length xs == 0 = []
+  | length c == 0 = splitWhen p (dropWhile p r)
+  | otherwise = c : splitWhen p (dropWhile p r) where
+    b = break p xs
+    c = fst b
+    r = snd b
+
+reduce :: (a -> a -> a) -> [a] -> a 
 reduce f (h:t) = foldl f h t
 
 pairs :: [a] -> [(a,a)]
@@ -110,3 +118,12 @@ rotations (x:xs) = (xs++[x]):(rotations (xs++[x]) )
 
 rotate :: [a] -> [[a]]
 rotate xs = take (length xs) (rotations xs)
+
+isDigit :: Char -> Bool
+isDigit c = c >= '0' && c <= '9'
+
+isHex :: Char -> Bool
+isHex c = isDigit c || (c >= 'a' && c <= 'f')
+
+isNumeric :: String -> Bool
+isNumeric = all isDigit
