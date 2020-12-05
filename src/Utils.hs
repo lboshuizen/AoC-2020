@@ -28,12 +28,6 @@ dimensions xs = (length . head $ xs, length xs)
 stoi :: String -> Int
 stoi s = read s :: Int
 
-product :: Num a => [a] -> a
-product = foldr (*) 1
-
-sum :: Num a => [a] -> a
-sum = foldr (+) 0
-
 readLines :: FilePath -> IO [String]
 readLines fname = 
    do
