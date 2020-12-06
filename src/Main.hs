@@ -1,11 +1,11 @@
 module Main where
 
 import Utils (readLines)
-import Day5.BinaryBoarding
+import Day6.CustomCustoms
 
 main :: IO ()
 main = do
-  r <- readLines "./data/day5.txt"
-  let l = binaryBoarding r
+  r <- readLines "./data/day6.txt"
+  let l = customs r
   print l -- $ take 3 l
 

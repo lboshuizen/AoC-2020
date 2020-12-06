@@ -2,6 +2,8 @@ module Utils where
 
 import Data.Ord (comparing)
 import Data.List (sortBy, groupBy, foldr)
+import Data.List.Split (splitWhen)
+import Data.Char (isDigit)
 
 -- creates an XY map/chart
 -- [".#.","#.."] => [
@@ -41,23 +43,8 @@ unpack xs = [x | Just x <- xs]
 split :: Eq a => a -> [a] -> [[a]]
 split p = splitWhen (==p)
 
-splitWhen :: (a -> Bool) -> [a] -> [[a]]
-splitWhen p xs
-  | length xs == 0 = []
-  | length c == 0 = splitWhen p (dropWhile p r)
-  | otherwise = c : splitWhen p (dropWhile p r) where
-    b = break p xs
-    c = fst b
-    r = snd b
-
-reduce :: (a -> a -> a) -> [a] -> a 
-reduce f (h:t) = foldl f h t
-
 pairs :: [a] -> [(a,a)]
 pairs xs = zip xs (tail xs)
-
-countWhere :: (a -> Bool) -> [a] -> Int
-countWhere f = length . filter f
 
 combinations :: [a] -> [a] -> [(a,a)]
 combinations lx rx = [(l,r) | l <- lx, r <- rx ]
@@ -67,9 +54,6 @@ partitions n [] = []
 partitions n xs = h:t
     where h = take n xs
           t = partitions n (drop n xs)
-
-both :: Eq b => (a -> b) -> a -> a -> Bool
-both f a b = f a == f b
 
 swap :: (a,b) -> (b,a)
 swap (a,b) = (b,a)
@@ -94,9 +78,6 @@ groupSnd = groupBy (\a b -> snd a == snd b)
 combine :: [a] -> [(a,[a])]
 combine xs = [(a,xs) | a <- xs]
 
-indexed :: [b] -> [(Int, b)]
-indexed = zip [0..]
-
 toDegrees :: Float -> Float
 toDegrees rad = rad * 180 / pi
 
@@ -112,12 +93,6 @@ rotations (x:xs) = (xs++[x]):(rotations (xs++[x]) )
 
 rotate :: [a] -> [[a]]
 rotate xs = take (length xs) (rotations xs)
-
-isDigit :: Char -> Bool
-isDigit c = c >= '0' && c <= '9'
-
-isHex :: Char -> Bool
-isHex c = isDigit c || (c >= 'a' && c <= 'f')
 
 isNumeric :: String -> Bool
 isNumeric = all isDigit
