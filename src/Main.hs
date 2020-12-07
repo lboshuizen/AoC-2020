@@ -1,11 +1,11 @@
 module Main where
 
 import Utils (readLines)
-import Day6.CustomCustoms
+import Day7.HandyHaversacks
 
 main :: IO ()
 main = do
-  r <- readLines "./data/day6.txt"
-  let l = customs r
-  print l -- $ take 3 l
-
+  r <- readLines "./data/day7.txt"
+  print (head r)
+  let l = haversacks r
+  print l
