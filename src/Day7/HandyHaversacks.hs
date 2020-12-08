@@ -28,10 +28,10 @@ parents s xs = ch ++ pr
     where ch = filter (canHold s) xs
           pr = concatMap (\c -> parents (fst c) (xs \\ ch)) ch
 
--- bottom up search
+-- bottom up
 part1 = length . nub . map fst . parents "shinygold" . map parse
 
--- top down scan
+-- top down
 part2 :: String -> [Rule] -> Int
 part2 s alst = case lookup s alst of
                    Nothing -> error "impossible"

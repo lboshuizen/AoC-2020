@@ -27,7 +27,10 @@ transpose = map (\((x,y),c) -> ((y,x),c))
 dimensions :: [[a]] -> (Int,Int)
 dimensions xs = (length . head $ xs, length xs)
 
+-- HACK: fixes leading +/- sign on number...
 stoi :: String -> Int
+stoi ('-':s) = -stoi s
+stoi ('+':s) = stoi s
 stoi s = read s :: Int
 
 readLines :: FilePath -> IO [String]

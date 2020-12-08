@@ -1,11 +1,10 @@
 module Main where
 
 import Utils (readLines)
-import Day7.HandyHaversacks
+import Day8.HandheldHalting
 
 main :: IO ()
 main = do
-  r <- readLines "./data/day7.txt"
-  print (head r)
-  let l = haversacks r
+  r <- readLines "./data/day8.txt"
+  let l = halting r
   print l
