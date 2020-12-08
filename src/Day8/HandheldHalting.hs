@@ -1,5 +1,6 @@
 module Day8.HandheldHalting (halting) where
 
+import Data.Maybe (fromJust)
 import Utils (stoi)
 import Data.Array
 
@@ -37,14 +38,14 @@ step (Jmp n) (ip,acc) = (ip+n,acc)
 step Trp _ = error "hit trap"
 step Hlt _ = error "end of program"
 
-runTillTrap :: Cpu -> [Int] -> Memory -> (Int,[Int])
-runTillTrap cpu@(pc,a) hist m 
-    | ins == Trp = (a,hist)
-    | otherwise = runTillTrap (step ins cpu) (pc:hist) (m // [(pc,Trp)])
+runTillTrap :: Cpu -> Memory -> Int
+runTillTrap cpu@(pc,a) m 
+    | ins == Trp = a
+    | otherwise = runTillTrap (step ins cpu) (m // [(pc,Trp)])
     where ins = m ! pc
 
 part1 :: [String] -> Int
-part1 = fst . runTillTrap (0,0) [] . program . compile
+part1 = runTillTrap (0,0) . program . compile
 
 swap :: Ins -> Ins
 swap (Jmp n) = Nop n
@@ -62,14 +63,12 @@ run m (cpu@(pc,a),modified)
     | ins == Hlt = Just a
     | otherwise = red . map (run (m // [(pc,Trp)])) $ next
     where ins = m ! pc
-          next = if modified then [((step ins cpu),b)] 
+          next = if modified then [((step ins cpu),modified)] 
                              else [((step ins cpu),False),((step (swap ins) cpu),True)]
 
 part2 :: [String] -> Int
-part2 xs = unwrap $ runBt p ((0,0),False)
+part2 xs = fromJust $ run p ((0,0),False)
     where p = program . compile $ xs
-          unwrap (Just a) = a
-          unwrap Nothing = -1
 
 halting :: [String] -> Int
 halting = part2
