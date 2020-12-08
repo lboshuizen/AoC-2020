@@ -31,7 +31,7 @@ parse s = (mne,stoi p)
 compile = map parse
 
 step :: Ins -> Cpu -> Cpu
-step (Nop _) (ip,acc) = (ip+1,acc)
+step (Nop n) (ip,acc) = (ip+1,acc)
 step (Add n) (ip,acc) = (ip+1,acc+n)
 step (Jmp n) (ip,acc) = (ip+n,acc)
 step Trp _ = error "hit trap"
@@ -49,28 +49,27 @@ part1 = fst . runTillTrap (0,0) [] . program . compile
 swap :: Ins -> Ins
 swap (Jmp n) = Nop n
 swap (Nop n) = Jmp n
+swap x = x
 
-replaceable :: Ins -> Bool
-replaceable (Jmp _) = True
-replaceable (Nop _) = True
-replaceable _ = False
+red :: [Maybe a] -> Maybe a
+red [] = Nothing
+red (Just a:_) = Just a
+red (_:xs) = red xs
 
-rewrite :: Memory -> [Int] -> [Memory]
-rewrite m h = [ m // [(i, swap ins)] | i <- h,let ins = m!i, replaceable ins ]
-
-run :: Cpu -> Memory -> Maybe Int
-run cpu@(pc,a) m
+run :: Memory -> (Cpu,Bool) -> Maybe Int
+run m (cpu@(pc,a),modified)
     | ins == Trp = Nothing
     | ins == Hlt = Just a
-    | otherwise = run (step ins cpu) (m // [(pc,Trp)])
+    | otherwise = red . map (run (m // [(pc,Trp)])) $ next
     where ins = m ! pc
+          next = if modified then [((step ins cpu),b)] 
+                             else [((step ins cpu),False),((step (swap ins) cpu),True)]
 
 part2 :: [String] -> Int
-part2 xs = unwrap . head . dropWhile (==Nothing) . map (run (0,0)) $ rewrite p hist
+part2 xs = unwrap $ runBt p ((0,0),False)
     where p = program . compile $ xs
-          hist = snd . runTillTrap (0,0) [] $ p
           unwrap (Just a) = a
+          unwrap Nothing = -1
 
 halting :: [String] -> Int
 halting = part2
-
