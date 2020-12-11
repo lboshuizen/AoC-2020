@@ -1,10 +1,10 @@
 module Main where
 
-import Utils (readLines)
-import Day9.EncodingError
+import Day10.AdapterArray
+import Utils (readLines, stoi)
 
 main :: IO ()
 main = do
-  r <- readLines "./data/day9.txt"
-  let l = encoding r
+  r <- readLines "./data/day10.txt"
+  let l = adapter (map stoi r)
   print l

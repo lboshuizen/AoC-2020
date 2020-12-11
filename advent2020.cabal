@@ -32,6 +32,7 @@ executable advent2020
   build-depends:       base
                        ,array
                        ,containers
+                       ,mtl
                        ,split
                        ,unordered-containers  
                        ,vector
