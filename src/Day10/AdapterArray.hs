@@ -1,5 +1,3 @@
-{-# LANGUAGE BangPatterns #-}
-
 module Day10.AdapterArray (adapter) where
 
 import Data.List (group, partition, sort)

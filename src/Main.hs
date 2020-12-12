@@ -1,10 +1,10 @@
 module Main where
 
-import Day10.AdapterArray
-import Utils (readLines, stoi)
+import Day11.SeatingSystem
+import Utils (readLines)
 
 main :: IO ()
 main = do
-  r <- readLines "./data/day10.txt"
-  let l = adapter (map stoi r)
+  r <- readLines "./data/day11.txt"
+  let l = seating r
   print l
