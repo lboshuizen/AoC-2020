@@ -1,10 +1,10 @@
 module Main where
 
-import Day12.RainRisk
+import Day13.ShuttleSearch
 import Utils (readLines)
 
 main :: IO ()
 main = do
-  r <- readLines "./data/day12.txt"
-  let l = rain r
+  r <- readLines "./data/day13.txt"
+  let l = shuttle r
   print l

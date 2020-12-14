@@ -33,6 +33,7 @@ executable advent2020
                        ,array
                        ,containers
                        ,mtl
+                       ,memoize
                        ,split
                        ,unordered-containers  
                        ,vector
