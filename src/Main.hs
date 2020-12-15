@@ -1,10 +1,10 @@
 module Main where
 
-import Day14.DockingData
+import Day15.RambunctiousRecitation
 import Utils (readLines)
 
 main :: IO ()
 main = do
-  r <- readLines "./data/day14.txt"
-  let l = docking r
+  r <- readLines "./data/day15.txt"
+  let l = recitation r
   print l
