@@ -1,8 +1,8 @@
 module Day16.TicketTranslation (ticket) where
 
 import           Data.Bifunctor  (second)
-import           Data.List       (intersect, isPrefixOf, length, partition,
-                                  sortBy, transpose, (\\))
+import           Data.List       (foldr1, intersect, isPrefixOf, length, nub,
+                                  partition, sortBy, transpose, (\\))
 import           Data.List.Split (splitOn)
 import           Data.Ord        (comparing)
 
@@ -23,78 +23,66 @@ parseTicket =  head . intList . take 1 . ignoreTill "your"
 parseNearby :: [String] -> [[Int]]
 parseNearby =  intList . ignoreTill "nearby"
 
+parseRule :: String -> Rule
+parseRule s = (lbl,[(a,b),(c,d)])
+    where
+        (lbl:rng:_) = splitOn ":" s
+        (a:b:c:d:_) = map stoi . splitOrDash $ rng
+        splitOrDash = concatMap (splitOn "-") . splitOn "or"
+        stoi s = read s ::Int
+
+parseRules :: [String] -> [Rule]
+parseRules = map parseRule . filter (/="") . takeWhile (not . isPrefixOf "your")
+
 -- *** solving ***
 
-validRule :: Int -> [(Int, Int)] -> Bool
-validRule n = any (\(s, e) -> n >= s && n <= e)
+len:: Int -> [a] -> Bool
+len n l = n == length l
 
-anyValid :: Int -> [Rule] -> Bool
-anyValid n = any (validRule n . snd)
+inRange :: Ord a => a -> (a,a) -> Bool
+inRange n (s,e) = n >= s && n <= e
 
-invalidFields :: [Rule] -> [Int] -> [Int]
-invalidFields rx tx = [ n | n <- tx, not $ anyValid n rx ]
+reduce :: Eq a => [[a]] -> [a]
+reduce = foldr1 intersect . filter (not . len 0)
 
-matchField :: [Rule] -> Int -> [String]
-matchField rx n = [ fst r | r <- rx, validRule n (snd r)]
+validRule :: Ord a => a -> [(a, a)] -> Bool
+validRule n = any (inRange n)
 
-matchFields :: [Rule] -> [Int] -> [[String]]
-matchFields rx = map (matchField rx)
-
-reduce :: Ord a => [[a]] -> [a]
-reduce (x:xs) = foldr intersect' x xs
-    where intersect' [] s = s
-          intersect' s [] = s
-          intersect' s s' = s `intersect` s'
-
-minFields :: [Rule] -> [Int] -> [String]
-minFields r = reduce . matchFields r
-
-stable :: Eq a => [(Int,[a])] -> [(Int,[a])]
-stable xs
-    | all (len 1) xs = xs
-    | otherwise = stable (o++diffs)
+possibleFields :: [Rule] -> [Int] -> [String]
+possibleFields rx = reduce . map matchField  . nub
     where
-        (o,r) = partition (len 1) xs
-        st = concatMap snd o
-        diffs = map (\(n,fl) -> (n,fl \\ st) ) r
-        len n l = n == length (snd l)
+        matchField n = [ fst r | r <- rx, validRule n (snd r)]
+
+fit :: Eq a => [(Int,[a])] -> [(Int,[a])]
+fit xs
+    | all (len 1 . snd) xs = xs
+    | otherwise = fit (placed++rest)
+    where
+        (placed,unstables) = partition (len 1 . snd) xs
+        stables = concatMap snd placed
+        rest = map (second (\\ stables)) unstables
 
 fields :: [Rule] -> [[Int]] -> [String]
-fields r = concatMap snd . sortBy (comparing fst) . stable . zip [0..] . map (minFields r) . transpose
+fields r = names . fit . fieldsPerPos
+    where
+        fieldsPerPos = zip [0..] . map (possibleFields r) . transpose
+        names = concatMap snd . sortBy (comparing fst)
 
 extract :: [Int] -> [String] -> [Int]
-extract yt = map fst . filter (\(_,fn) -> "departure" `isPrefixOf` fn) . zip yt
+extract yt = map fst . filter (isPrefixOf "departure" . snd) . zip yt
 
-part2 r nb yt = product . extract yt $ fields r nb
+part2 :: [Rule] -> [[Int]] -> [Int] -> Int
+part2 r nb yt = product . extract yt . fields r $ nb
 
-part1 = sum . concatMap (invalidFields rules)
+part1 :: [Rule] -> [[Int]] -> Int
+part1 r = sum . concatMap invalidFields
+    where invalidFields tx = [ n | n <- tx, not . any (validRule n . snd) $ r ]
 
-ticket xs = (part1 nb, part2 rules nb t)
+-- *** Solution
+
+ticket :: [String] -> (Int,Int)
+ticket xs = (part1 r nb, part2 r nb t)
     where
           nb = parseNearby xs
           t = parseTicket xs
-
--- lazy, less work to extract the rules instead of parsing our
-rules :: [Rule]
-rules = [
-        ("departure location", [(49,258),(268,960)]),
-        ("departure station", [( 37,117),(128,968)]),
-        ("departure platform", [( 31,70 ),( 78,974)]),
-        ("departure track", [( 26,234 ),( 247,952)]),
-        ("departure date", [( 49,625 ),( 635,969)]),
-        ("departure time", [( 26,777 ),( 799,974)]),
-        ("arrival location", [( 49,735 ),( 757,971)]),
-        ("arrival station", [( 28,381 ),( 399,970)]),
-        ("arrival platform", [( 49,77 ),( 95,957)]),
-        ("arrival track", [( 29,467 ),( 477,950)]),
-        ("class", [( 40,218 ),( 234,967)]),
-        ("duration", [( 45,900 ),( 911,970)]),
-        ("price", [( 42,442 ),( 452,966)]),
-        ("route", [( 45,104 ),( 112,953)]),
-        ("row", [( 49,877 ),( 884,957)]),
-        ("seat", [( 40,168 ),( 184,953)]),
-        ("train", [( 43,913 ),( 920,949)]),
-        ("type", [( 43,292 ),( 315,955)]),
-        ("wagon", [( 48,547 ),( 558,954)]),
-        ("zone", [( 40,929 ),( 935,954)])
-    ]
+          r = parseRules xs
