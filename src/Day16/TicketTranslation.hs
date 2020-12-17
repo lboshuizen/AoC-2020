@@ -8,6 +8,7 @@ import           Data.Ord        (comparing)
 
 -- A rule has a name and one or more ranges (start,end)
 type Rule = (String, [(Int, Int)])
+type Ticket = [Int]
 
 -- *** parsing ***
 
@@ -39,21 +40,16 @@ parseRules = map parseRule . filter (/="") . takeWhile (not . isPrefixOf "your")
 len:: Int -> [a] -> Bool
 len n l = n == length l
 
-inRange :: Ord a => a -> (a,a) -> Bool
-inRange n (s,e) = n >= s && n <= e
-
 reduce :: Eq a => [[a]] -> [a]
 reduce = foldr1 intersect . filter (not . len 0)
+
+inRange :: Ord a => a -> (a,a) -> Bool
+inRange n (s,e) = n >= s && n <= e
 
 validRule :: Ord a => a -> [(a, a)] -> Bool
 validRule n = any (inRange n)
 
-possibleFields :: [Rule] -> [Int] -> [String]
-possibleFields rx = reduce . map matchField  . nub
-    where
-        matchField n = [ fst r | r <- rx, validRule n (snd r)]
-
-fit :: Eq a => [(Int,[a])] -> [(Int,[a])]
+fit :: Eq a => [(n,[a])] -> [(n,[a])]
 fit xs
     | all (len 1 . snd) xs = xs
     | otherwise = fit (placed++rest)
@@ -62,19 +58,24 @@ fit xs
         stables = concatMap snd placed
         rest = map (second (\\ stables)) unstables
 
-fields :: [Rule] -> [[Int]] -> [String]
+possibleFields :: [Rule] -> [Int] -> [String]
+possibleFields rx = reduce . map matchField  . nub
+    where
+        matchField n = [ fst r | r <- rx, validRule n (snd r)]
+
+fields :: [Rule] -> [Ticket] -> [String]
 fields r = names . fit . fieldsPerPos
     where
         fieldsPerPos = zip [0..] . map (possibleFields r) . transpose
         names = concatMap snd . sortBy (comparing fst)
 
-extract :: [Int] -> [String] -> [Int]
+extract :: Ticket -> [String] -> [Int]
 extract yt = map fst . filter (isPrefixOf "departure" . snd) . zip yt
 
-part2 :: [Rule] -> [[Int]] -> [Int] -> Int
+part2 :: [Rule] -> [Ticket] -> Ticket -> Int
 part2 r nb yt = product . extract yt . fields r $ nb
 
-part1 :: [Rule] -> [[Int]] -> Int
+part1 :: [Rule] -> [Ticket] -> Int
 part1 r = sum . concatMap invalidFields
     where invalidFields tx = [ n | n <- tx, not . any (validRule n . snd) $ r ]
 

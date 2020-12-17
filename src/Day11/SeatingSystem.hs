@@ -21,7 +21,7 @@ until2 p f a
   where
     a' = f a
 
-directions :: [Pos]
+directions :: [Pos] 
 directions = [(-1, -1), (0, -1), (1, -1), (-1, 0), (1, 0), (-1, 1), (0, 1), (1, 1)]
 
 room :: [String] -> Room
