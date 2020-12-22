@@ -1,10 +1,10 @@
 module Main where
 
-import           Day17.ConwayCubes (boot)
-import           Utils             (readLines)
+import           Day22.CrabCombat (combat)
+import           Utils            (readLines)
 
 main :: IO ()
 main = do
-  r <- readLines "./data/day17.txt"
-  let l = boot r
+  r <- readLines "./data/day22.txt"
+  let l = combat r
   print l

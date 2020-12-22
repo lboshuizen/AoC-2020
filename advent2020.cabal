@@ -25,7 +25,7 @@ executable advent2020
   main-is:             Main.hs
   ghc-options:         -threaded
                        -rtsopts
-                       "-with-rtsopts=-N8 -s"
+                       "-with-rtsopts=-N16 -s"
   -- other-modules:
   -- other-extensions:
   build-depends:       base
